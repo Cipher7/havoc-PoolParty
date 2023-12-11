@@ -1,0 +1,3 @@
+[submodule "PoolParty"]
+	path = PoolParty
+	url = https://github.com/Cipher7/PoolParty
