@@ -15,11 +15,11 @@ PoC Github: https://github.com/SafeBreach-Labs/PoolParty
 | 1  | Overwrite the start routine of the target worker factory       | (IN PROGRESS)|
 | 2  | Insert TP_WORK work item to the target process's thread pool   | (IN PROGRESS)|
 | 3  | Insert TP_WAIT work item to the target process's thread pool   | (IN PROGRESS)|
-| 4  | Insert TP_IO work item to the target process's thread pool     | |
-| 5  | Insert TP_ALPC work item to the target process's thread pool   | |
-| 6  | Insert TP_JOB work item to the target process's thread pool    | |
-| 7  | Insert TP_DIRECT work item to the target process's thread pool | |
-| 8  | Insert TP_TIMER work item to the target process's thread pool  | |
+| 4  | Insert TP_IO work item to the target process's thread pool     | READY |
+| 5  | Insert TP_ALPC work item to the target process's thread pool   | READY |
+| 6  | Insert TP_JOB work item to the target process's thread pool    | READY |
+| 7  | Insert TP_DIRECT work item to the target process's thread pool | READY |
+| 8  | Insert TP_TIMER work item to the target process's thread pool  | READY |
 
 
 ## Installation
