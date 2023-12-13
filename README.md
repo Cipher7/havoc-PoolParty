@@ -45,7 +45,7 @@ poolparty run -V {4,5,6,7,8} -P {PID}
 
 ## Screenshots
 
-![Havoc](https://raw.githubusercontent.com/Cipher7/havoc-PoolParty/main/havoc-poolparty.png?token=GHSAT0AAAAAACBATHT5KKC3SW7TEGM3PG4OZLZXMVA)
+![Havoc](https://raw.githubusercontent.com/Cipher7/havoc-PoolParty/main/havoc-poolparty.png)
 
 ## Credits
 
