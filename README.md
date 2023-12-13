@@ -2,16 +2,16 @@
 
 Havoc Extension to a PoC Windows Thread Pool Injection created by [Alon Leviev](https://twitter.com/_0xDeku)
 
-PoC Github : https://github.com/SafeBreach-Labs/PoolParty
+PoC Github: https://github.com/SafeBreach-Labs/PoolParty
 
 
-#### generate.py - Custom PoolParty.exe generator script (Max payload size : 200k)
+#### generate.py - Custom PoolParty.exe generator script (Max payload size: 200k)
 
 
 ## PoolParty Variants
 
-| Variant ID  | Varient Description ||
-| ------------- | ----------------- ||
+| Variant ID  | Varient Description | Status |
+| ------------- | ----------------- | ---------- |
 | 1  | Overwrite the start routine of the target worker factory       | (IN PROGRESS)|
 | 2  | Insert TP_WORK work item to the target process's thread pool   | (IN PROGRESS)|
 | 3  | Insert TP_WAIT work item to the target process's thread pool   | (IN PROGRESS)|
