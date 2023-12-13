@@ -1,10 +1,12 @@
 # havoc-PoolParty
 
-Havoc Extension to a PoC Windows Thread Pool Injection created by ![Alon Leviev](https://twitter.com/_0xDeku)
+Havoc Extension to a PoC Windows Thread Pool Injection created by [Alon Leviev](https://twitter.com/_0xDeku)
 
 PoC Github : https://github.com/SafeBreach-Labs/PoolParty
 
-generate.py - Custom PoolParty.exe generator script based on PoolParty-master.exe (Max payload size : 200k)
+
+#### generate.py - Custom PoolParty.exe generator script (Max payload size : 200k)
+
 
 ## PoolParty Variants
 
@@ -35,7 +37,7 @@ OR
 
 ### Generate payload
 
-poolparty generate -a <x86/x64> -l <listener name>
+poolparty generate -a {x86/x64} -l {listener name}
 
 ### Injection 
 
@@ -43,6 +45,6 @@ poolparty run -V {4,5,6,7,8} -P {PID}
 
 ## Credits
 
-My good friend ![0xEr3bus](https://twitter.com/0xEr3bus) for having patience :)
+My good friend [0xEr3bus](https://twitter.com/0xEr3bus) for having patience :)
 
 Check out his BOF implementation : https://github.com/0xEr3bus/PoolPartyBof

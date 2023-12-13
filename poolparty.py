@@ -8,11 +8,10 @@ from base64 import b64decode, b64encode
 from time import sleep
 
 
-#cwd = os.getcwd()
-cwd = "/home/cipher/Github/havoc-PoolParty"
+cwd = os.getcwd() + "/data/extensions/havoc-PoolParty"  # change this 
 shellcode_file_path = cwd + "/payload.bin"
-poolparty_file_path = cwd + "/PoolParty.exe"
-variant = "8"
+
+variant = ""
 pid = ""
 
 def generate_payload(demon, arch, listener):
